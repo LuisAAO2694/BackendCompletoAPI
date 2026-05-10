@@ -11,16 +11,11 @@ const create = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
     try {
-        const { status, user, product, fechaDesde, fechaHasta, page = 1, limit = 10 } = req.query;
+        const { status, student_id, product_id, page = 1, limit = 10 } = req.query;
         const filters = {};
         if (status) filters.status = status;
-        if (user) filters.user = user;
-        if (product) filters.product = product;
-        if (fechaDesde || fechaHasta) {
-            filters.loanDate = {};
-            if (fechaDesde) filters.loanDate.$gte = new Date(fechaDesde);
-            if (fechaHasta) filters.loanDate.$lte = new Date(fechaHasta);
-        }
+        if (student_id) filters.student = student_id;
+        if (product_id) filters['equipment.product'] = product_id;
         const result = await loansService.getAll(filters, page, limit);
         res.json(result);
     } catch (error) {
@@ -28,20 +23,10 @@ const getAll = async (req, res, next) => {
     }
 };
 
-const getActive = async (req, res, next) => {
+const getMyLoans = async (req, res, next) => {
     try {
-        const { page = 1, limit = 10 } = req.query;
-        const result = await loansService.getActive(page, limit);
-        res.json(result);
-    } catch (error) {
-        next(error);
-    }
-};
-
-const getMine = async (req, res, next) => {
-    try {
-        const { page = 1, limit = 10 } = req.query;
-        const result = await loansService.getByUser(req.user.id, page, limit);
+        const { tipo = 'all', page = 1, limit = 10 } = req.query;
+        const result = await loansService.getByStudent(req.user.id, tipo, page, limit);
         res.json(result);
     } catch (error) {
         next(error);
@@ -57,14 +42,53 @@ const getById = async (req, res, next) => {
     }
 };
 
-const updateStatus = async (req, res, next) => {
+const approve = async (req, res, next) => {
     try {
-        const { status } = req.body;
-        const loan = await loansService.updateStatus(req.params.id, status);
+        const { observaciones } = req.body;
+        const loan = await loansService.approve(req.params.id, req.user.id, observaciones);
         res.json(loan);
     } catch (error) {
         next(error);
     }
 };
 
-export default { create, getAll, getActive, getMine, getById, updateStatus };
+const reject = async (req, res, next) => {
+    try {
+        const { razon } = req.body;
+        const loan = await loansService.reject(req.params.id, razon);
+        res.json(loan);
+    } catch (error) {
+        next(error);
+    }
+};
+
+const deliver = async (req, res, next) => {
+    try {
+        const { observaciones } = req.body;
+        const loan = await loansService.deliver(req.params.id, observaciones);
+        res.json(loan);
+    } catch (error) {
+        next(error);
+    }
+};
+
+const cancel = async (req, res, next) => {
+    try {
+        const loan = await loansService.cancel(req.params.id);
+        res.json(loan);
+    } catch (error) {
+        next(error);
+    }
+};
+
+const devolutions = async (req, res, next) => {
+    try {
+        const { devoluciones } = req.body;
+        const loan = await loansService.devolutions(req.params.id, devoluciones);
+        res.json(loan);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export default { create, getAll, getMyLoans, getById, approve, reject, deliver, cancel, devolutions };

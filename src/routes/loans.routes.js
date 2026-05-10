@@ -9,7 +9,7 @@ const router = Router();
  * @swagger
  * /api/loans:
  *   get:
- *     summary: Listar todos los préstamos (admin)
+ *     summary: Listar todos los préstamos (encargado)
  *     tags: [Loans]
  *     security:
  *       - bearerAuth: []
@@ -18,27 +18,15 @@ const router = Router();
  *         name: status
  *         schema:
  *           type: string
- *           enum: [activo, entregado]
+ *           enum: [PENDIENTE_APROBACION, APROBADO, ACTIVO, RECHAZADO, CANCELADO, FINALIZADO, PARCIALMENTE_DEVUELTO]
  *       - in: query
- *         name: user
+ *         name: student_id
  *         schema:
  *           type: string
  *       - in: query
- *         name: product
+ *         name: product_id
  *         schema:
  *           type: string
- *       - in: query
- *         name: fechaDesde
- *         schema:
- *           type: string
- *           format: date
- *         description: Fecha inicial (YYYY-MM-DD)
- *       - in: query
- *         name: fechaHasta
- *         schema:
- *           type: string
- *           format: date
- *         description: Fecha final (YYYY-MM-DD)
  *       - in: query
  *         name: page
  *         schema:
@@ -57,38 +45,19 @@ router.get('/', authMiddleware, roleMiddleware('admin'), loansController.getAll)
 
 /**
  * @swagger
- * /api/loans/activos:
+ * /api/loans/mis-prestamos:
  *   get:
- *     summary: Listar préstamos activos (admin)
+ *     summary: Ver mis préstamos (estudiante)
  *     tags: [Loans]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: page
+ *         name: tipo
  *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *     responses:
- *       200:
- *         description: Lista de préstamos activos
- */
-router.get('/activos', authMiddleware, roleMiddleware('admin'), loansController.getActive);
-
-/**
- * @swagger
- * /api/loans/mios:
- *   get:
- *     summary: Ver mis préstamos (usuario autenticado)
- *     tags: [Loans]
- *     security:
- *       - bearerAuth: []
- *     parameters:
+ *           type: string
+ *           enum: [activos, historial, all]
+ *           default: all
  *       - in: query
  *         name: page
  *         schema:
@@ -103,7 +72,7 @@ router.get('/activos', authMiddleware, roleMiddleware('admin'), loansController.
  *       200:
  *         description: Lista de mis préstamos
  */
-router.get('/mios', authMiddleware, loansController.getMine);
+router.get('/mis-prestamos', authMiddleware, loansController.getMyLoans);
 
 /**
  * @swagger
@@ -131,7 +100,7 @@ router.get('/:id', authMiddleware, loansController.getById);
  * @swagger
  * /api/loans:
  *   post:
- *     summary: Registrar nuevo préstamo (admin)
+ *     summary: Registrar nuevo préstamo (estudiante)
  *     tags: [Loans]
  *     security:
  *       - bearerAuth: []
@@ -142,25 +111,58 @@ router.get('/:id', authMiddleware, loansController.getById);
  *           schema:
  *             type: object
  *             required:
- *               - user
- *               - product
+ *               - equipment
  *               - estimatedReturnDate
  *             properties:
- *               user: { type: string }
- *               product: { type: string }
- *               estimatedReturnDate: { type: string, format: date-time }
- *               observations: { type: string }
+ *               equipment:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     product: { type: string }
+                     observations: { type: string }
+               estimatedReturnDate: { type: string, format: date-time }
+               notes: { type: string }
  *     responses:
  *       201:
  *         description: Préstamo creado
+ *       400:
+ *         description: Equipo no disponible
  */
-router.post('/', authMiddleware, roleMiddleware('admin'), loansController.create);
+router.post('/', authMiddleware, roleMiddleware('user'), loansController.create);
 
 /**
  * @swagger
- * /api/loans/{id}/estatus:
+ * /api/loans/{id}/aprobar:
  *   patch:
- *     summary: Marcar préstamo como entregado (admin)
+ *     summary: Aprobar préstamo (encargado)
+ *     tags: [Loans]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               observaciones: { type: string }
+ *     responses:
+ *       200:
+ *         description: Préstamo aprobado
+ */
+router.patch('/:id/aprobar', authMiddleware, roleMiddleware('admin'), loansController.approve);
+
+/**
+ * @swagger
+ * /api/loans/{id}/rechazar:
+ *   patch:
+ *     summary: Rechazar préstamo (encargado)
  *     tags: [Loans]
  *     security:
  *       - bearerAuth: []
@@ -177,13 +179,103 @@ router.post('/', authMiddleware, roleMiddleware('admin'), loansController.create
  *           schema:
  *             type: object
  *             required:
- *               - status
+ *               - razon
  *             properties:
- *               status: { type: string, enum: [entregado] }
+ *               razon: { type: string }
  *     responses:
  *       200:
- *         description: Préstamo actualizado
+ *         description: Préstamo rechazado
  */
-router.patch('/:id/estatus', authMiddleware, roleMiddleware('admin'), loansController.updateStatus);
+router.patch('/:id/rechazar', authMiddleware, roleMiddleware('admin'), loansController.reject);
+
+/**
+ * @swagger
+ * /api/loans/{id}/entregar:
+ *   patch:
+ *     summary: Entregar préstamo aprobado (encargado)
+ *     tags: [Loans]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               observaciones: { type: string }
+ *     responses:
+ *       200:
+ *         description: Préstamo entregado (estado ACTIVO)
+ *       400:
+ *         description: El préstamo no está en estado APROBADO
+ */
+router.patch('/:id/entregar', authMiddleware, roleMiddleware('admin'), loansController.deliver);
+
+/**
+ * @swagger
+ * /api/loans/{id}/cancelar:
+ *   patch:
+ *     summary: Cancelar préstamo (estudiante)
+ *     tags: [Loans]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Préstamo cancelado
+ *       400:
+ *         description: Solo se puede cancelar en estado PENDIENTE_APROBACION
+ */
+router.patch('/:id/cancelar', authMiddleware, roleMiddleware('user'), loansController.cancel);
+
+/**
+ * @swagger
+ * /api/loans/{id}/devoluciones:
+ *   post:
+ *     summary: Registrar devoluciones de equipos (encargado)
+ *     tags: [Loans]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - devoluciones
+ *             properties:
+ *               devoluciones:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     equipo_id: { type: string }
+ *                     estadoDevolucion:
+ *                       type: string
+ *                       enum: [DEVUELTO, DEVUELTO_DAÑADO, NO_DEVUELTO]
+ *                     observaciones: { type: string }
+ *     responses:
+ *       200:
+ *         description: Devoluciones procesadas
+ */
+router.post('/:id/devoluciones', authMiddleware, roleMiddleware('admin'), loansController.devolutions);
 
 export default router;

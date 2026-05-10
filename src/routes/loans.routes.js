@@ -118,11 +118,11 @@ router.get('/:id', authMiddleware, loansController.getById);
  *                 type: array
  *                 items:
  *                   type: object
- *                   properties:
- *                     product: { type: string }
-                     observations: { type: string }
-               estimatedReturnDate: { type: string, format: date-time }
-               notes: { type: string }
+*                   properties:
+*                     product: { type: string }
+*                     observations: { type: string }
+*               estimatedReturnDate: { type: string, format: date-time }
+*               notes: { type: string }
  *     responses:
  *       201:
  *         description: Préstamo creado

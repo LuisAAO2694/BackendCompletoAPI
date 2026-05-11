@@ -15,7 +15,7 @@ const seedAdmin = async () => {
     //Contamos los usuarios con rol admin
     const count = await User.countDocuments({ role: 'admin' });
 
-    //Si no hay nenhum admin, creamos uno
+    //Si no hay admin, creamos uno
     if (count === 0) 
     {
         await User.create({
@@ -32,7 +32,7 @@ const seedAdmin = async () => {
 app.listen(PORT, async () => {
 
     console.log(`Servidor corriendo en puerto ${PORT}`);
-    
+
     //Ejecutamos el seed del admin al iniciar
     await seedAdmin();
 });

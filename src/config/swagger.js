@@ -1,5 +1,12 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 
+//Configuracion de Swagger para documentar la API
+/*
+    Define el titulo, version y descripcion de la API
+    Configura los servidores disponibles
+    Define los esquemas de los modelos de datos
+    Configura la autenticacion con JWT Bearer
+*/
 const options = {
     definition: {
         openapi: '3.0.0',
@@ -45,13 +52,15 @@ const options = {
                 Loan: {
                     type: 'object',
                     properties: {
-                        user: { type: 'string' },
-                        product: { type: 'string' },
-                        loanDate: { type: 'string', format: 'date-time' },
+                        student: { type: 'string' },
+                        equipment: { type: 'array' },
                         estimatedReturnDate: { type: 'string', format: 'date-time' },
+                        startDate: { type: 'string', format: 'date-time' },
                         actualReturnDate: { type: 'string', format: 'date-time' },
-                        status: { type: 'string', enum: ['activo', 'entregado'] },
-                        observations: { type: 'string' },
+                        status: { type: 'string', enum: ['PENDIENTE_APROBACION', 'APROBADO', 'ACTIVO', 'RECHAZADO', 'CANCELADO', 'FINALIZADO', 'PARCIALMENTE_DEVUELTO'] },
+                        reason: { type: 'string' },
+                        approvalObservations: { type: 'string' },
+                        notes: { type: 'string' },
                     },
                 },
                 Message: {
@@ -78,4 +87,5 @@ const options = {
     apis: ['./src/routes/*.js'],
 };
 
+//Exportamos la configuracion de Swagger
 export const specs = swaggerJsdoc(options);

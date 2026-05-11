@@ -45,7 +45,6 @@ const userSchema = new mongoose.Schema(
 
 );
 
-//======================================================
 //Aqui tenemos el hook pre-save
 /*
     En si antes de guardar el user,

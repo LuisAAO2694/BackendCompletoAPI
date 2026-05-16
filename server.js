@@ -4,25 +4,25 @@ import User from './src/models/User.js';
 //Puerto donde se ejecutara el servidor
 const PORT = process.env.PORT || 3000;
 
-//Funcion para crear el usuario admin por defecto
+//Funcion para crear el usuario encargado por defecto
 /*
-    Verifica si ya existe un usuario con rol admin
+    Verifica si ya existe un usuario con rol encargado
     Si no existe, lo crea con credenciales por defecto
     Se ejecuta cada vez que inicia el servidor
 */
 const seedAdmin = async () => {
 
-    //Contamos los usuarios con rol admin
-    const count = await User.countDocuments({ role: 'admin' });
+    //Contamos los usuarios con rol encargado'
+    const count = await User.countDocuments({ role: 'encargado' });
 
-    //Si no hay admin, creamos uno
+    //Si no hay encargado, creamos uno
     if (count === 0) 
     {
         await User.create({
             name: 'Admin',
             email: 'admin@lab.com',
             password: 'admin1234',
-            role: 'admin'
+            role: 'encargado'
         });
         console.log('Admin creado por defecto');
     }
@@ -33,6 +33,6 @@ app.listen(PORT, async () => {
 
     console.log(`Servidor corriendo en puerto ${PORT}`);
 
-    //Ejecutamos el seed del admin al iniciar
+    //Ejecutamos el seed del encargado al iniciar
     await seedAdmin();
 });

@@ -2,6 +2,18 @@ import { Router } from 'express';
 import loansController from '../controllers/loans.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import roleMiddleware from '../middlewares/role.middleware.js';
+import {
+    createLoanValidation,
+    approveLoanValidation,
+    rejectLoanValidation,
+    deliverLoanValidation,
+    cancelLoanValidation,
+    devolutionsValidation,
+    getLoansValidation,
+    getMyLoansValidation,
+    loanIdValidation,
+    validate
+} from '../validators/loans.validator.js';
 
 const router = Router();
 
@@ -41,7 +53,7 @@ const router = Router();
  *       200:
  *         description: Lista de préstamos
  */
-router.get('/', authMiddleware, roleMiddleware('admin'), loansController.getAll);
+router.get('/', authMiddleware, roleMiddleware('encargado'), getLoansValidation, validate, loansController.getAll);
 
 /**
  * @swagger
@@ -72,7 +84,32 @@ router.get('/', authMiddleware, roleMiddleware('admin'), loansController.getAll)
  *       200:
  *         description: Lista de mis préstamos
  */
-router.get('/mis-prestamos', authMiddleware, loansController.getMyLoans);
+router.get('/mis-prestamos', authMiddleware, getMyLoansValidation, validate, loansController.getMyLoans);
+
+/**
+ * @swagger
+ * /api/loans/no-devueltos:
+ *   get:
+ *     summary: Ver préstamos con equipos no devueltos (encargado)
+ *     tags: [Loans]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: Lista de préstamos con equipos no devueltos
+ */
+router.get('/no-devueltos', authMiddleware, roleMiddleware('encargado'), loansController.getNotReturned);
 
 /**
  * @swagger
@@ -94,7 +131,7 @@ router.get('/mis-prestamos', authMiddleware, loansController.getMyLoans);
  *       404:
  *         description: Préstamo no encontrado
  */
-router.get('/:id', authMiddleware, loansController.getById);
+router.get('/:id', authMiddleware, loanIdValidation, validate, loansController.getById);
 
 /**
  * @swagger
@@ -129,7 +166,7 @@ router.get('/:id', authMiddleware, loansController.getById);
  *       400:
  *         description: Equipo no disponible
  */
-router.post('/', authMiddleware, roleMiddleware('user'), loansController.create);
+router.post('/', authMiddleware, roleMiddleware('estudiante'), createLoanValidation, validate, loansController.create);
 
 /**
  * @swagger
@@ -156,7 +193,7 @@ router.post('/', authMiddleware, roleMiddleware('user'), loansController.create)
  *       200:
  *         description: Préstamo aprobado
  */
-router.patch('/:id/aprobar', authMiddleware, roleMiddleware('admin'), loansController.approve);
+router.patch('/:id/aprobar', authMiddleware, roleMiddleware('encargado'), approveLoanValidation, validate, loansController.approve);
 
 /**
  * @swagger
@@ -186,7 +223,7 @@ router.patch('/:id/aprobar', authMiddleware, roleMiddleware('admin'), loansContr
  *       200:
  *         description: Préstamo rechazado
  */
-router.patch('/:id/rechazar', authMiddleware, roleMiddleware('admin'), loansController.reject);
+router.patch('/:id/rechazar', authMiddleware, roleMiddleware('encargado'), rejectLoanValidation, validate, loansController.reject);
 
 /**
  * @swagger
@@ -215,7 +252,7 @@ router.patch('/:id/rechazar', authMiddleware, roleMiddleware('admin'), loansCont
  *       400:
  *         description: El préstamo no está en estado APROBADO
  */
-router.patch('/:id/entregar', authMiddleware, roleMiddleware('admin'), loansController.deliver);
+router.patch('/:id/entregar', authMiddleware, roleMiddleware('encargado'), deliverLoanValidation, validate, loansController.deliver);
 
 /**
  * @swagger
@@ -237,7 +274,7 @@ router.patch('/:id/entregar', authMiddleware, roleMiddleware('admin'), loansCont
  *       400:
  *         description: Solo se puede cancelar en estado PENDIENTE_APROBACION
  */
-router.patch('/:id/cancelar', authMiddleware, roleMiddleware('user'), loansController.cancel);
+router.patch('/:id/cancelar', authMiddleware, roleMiddleware('estudiante'), cancelLoanValidation, validate, loansController.cancel);
 
 /**
  * @swagger
@@ -276,6 +313,6 @@ router.patch('/:id/cancelar', authMiddleware, roleMiddleware('user'), loansContr
  *       200:
  *         description: Devoluciones procesadas
  */
-router.post('/:id/devoluciones', authMiddleware, roleMiddleware('admin'), loansController.devolutions);
+router.post('/:id/devoluciones', authMiddleware, roleMiddleware('encargado'), devolutionsValidation, validate, loansController.devolutions);
 
 export default router;

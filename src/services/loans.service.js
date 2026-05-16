@@ -183,7 +183,7 @@ const cancel = async (id) => {
 
 //Funcion para procesar las devoluciones de un prestamo
 /*
-    Recibe el ID del prestamo y la lista de devoluciones
+    Rece el ID del prestamo y la lista de devoluciones
     Valida que el prestamo exista
     Llama al repositorio para procesar las devoluciones
     Retorna el prestamo actualizado
@@ -200,4 +200,21 @@ const devolutions = async (id, returns) => {
     return await loansRepository.processDevolutions(id, returns);
 };
 
-export default { create, getAll, getByStudent, getById, approve, reject, deliver, cancel, devolutions };
+//Funcion para obtener prestamos con equipos no devueltos
+/*
+    Rece pagina y limite
+    Filtra prestamos que tienen equipos con status PRESTADO o NO_DEVUELTO
+    Construye la respuesta con paginacion
+    Retorna el total, pagina, limite y los prestamos
+*/
+const getNotReturned = async (page, limit) => {
+    const result = await loansRepository.findLoansNotReturned(page, limit);
+    return {
+        total: result.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        data: result.loans
+    };
+};
+
+export default { create, getAll, getByStudent, getById, approve, reject, deliver, cancel, devolutions, getNotReturned };

@@ -54,7 +54,15 @@ const login = async (email, password) => {
 
     //Retornamos el usuario (sin password) y el token
     return {
-        user: { id: user._id, name: user.name, email: user.email, role: user.role },
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            studentId: user.studentId || null,
+            career: user.career || null,
+            phone: user.phone || null
+        },
         token
     };
 };

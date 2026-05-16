@@ -80,4 +80,22 @@ const remove = async (id) => {
     return product;
 };
 
-export default { create, getAll, getById, update, remove };
+//Funcion para obtener todas las categorías únicas
+/*
+    Llama al repositorio para obtener las categorías
+    Retorna la lista de categorías
+*/
+const getCategories = async () => {
+    return await productsRepository.findCategories();
+};
+
+//Funcion para obtener todos los laboratorios únicos
+/*
+    Llama al repositorio para obtener los laboratorios
+    Retorna la lista de laboratorios
+*/
+const getLaboratories = async () => {
+    return await productsRepository.findLaboratories();
+};
+
+export default { create, getAll, getById, update, remove, getCategories, getLaboratories };

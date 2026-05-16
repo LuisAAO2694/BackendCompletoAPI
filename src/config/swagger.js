@@ -35,7 +35,10 @@ const options = {
                     properties: {
                         name: { type: 'string' },
                         email: { type: 'string' },
-                        role: { type: 'string', enum: ['admin', 'user'] },
+                        role: { type: 'string', enum: ['estudiante', 'encargado'] },
+                        studentId: { type: 'string' },
+                        career: { type: 'string' },
+                        phone: { type: 'string' },
                     },
                 },
                 Product: {
@@ -44,6 +47,7 @@ const options = {
                         name: { type: 'string' },
                         description: { type: 'string' },
                         category: { type: 'string' },
+                        laboratory: { type: 'string' },
                         serialNumber: { type: 'string' },
                         status: { type: 'string', enum: ['disponible', 'prestado', 'mantenimiento'] },
                         image: { type: 'string' },

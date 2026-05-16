@@ -21,7 +21,7 @@ const create = async (req, res, next) => {
 
 //Controlador para obtener todos los productos
 /*
-    Recibe filtros por query params (category, status, page, limit)
+    Recibe filtros por query params (category, status, search, laboratory, page, limit)
     Construye los filtros para la busqueda
     Llama al servicio de productos para obtenerlos
     Si hay un error, lo pasa al middleware de errores
@@ -30,12 +30,48 @@ const create = async (req, res, next) => {
 const getAll = async (req, res, next) => {
     try 
     {
-        const { category, status, page = 1, limit = 10 } = req.query;
+        const { category, status, search, laboratory, page = 1, limit = 10 } = req.query;
         const filters = {};
         if (category) filters.category = category;
         if (status) filters.status = status;
+        if (laboratory) filters.laboratory = laboratory;
+        if (search) filters.name = { $regex: search, $options: 'i' };
         const result = await productsService.getAll(filters, page, limit);
         res.json(result);
+    } 
+    catch (error) 
+    {
+        next(error);
+    }
+};
+
+//Controlador para obtener todas las categorías únicas
+/*
+    Llama al servicio para obtener las categorías
+    Retorna la lista de categorías
+*/
+const getCategories = async (req, res, next) => {
+    try 
+    {
+        const categories = await productsService.getCategories();
+        res.json(categories);
+    } 
+    catch (error) 
+    {
+        next(error);
+    }
+};
+
+//Controlador para obtener todos los laboratorios únicos
+/*
+    Llama al servicio para obtener los laboratorios
+    Retorna la lista de laboratorios
+*/
+const getLaboratories = async (req, res, next) => {
+    try 
+    {
+        const laboratories = await productsService.getLaboratories();
+        res.json(laboratories);
     } 
     catch (error) 
     {
@@ -101,4 +137,4 @@ const remove = async (req, res, next) => {
     }
 };
 
-export default { create, getAll, getById, update, remove };
+export default { create, getAll, getById, update, remove, getCategories, getLaboratories };

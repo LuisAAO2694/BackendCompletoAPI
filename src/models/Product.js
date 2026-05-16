@@ -21,6 +21,12 @@ const productSchema = new mongoose.Schema(
             required: true //Campo obligatorio
         },
 
+        //Laboratorio al que pertenece el equipo
+        laboratory: {
+            type: String, //Tipo texto
+            required: true //Campo obligatorio
+        },
+
         //Numero de serie unico del equipo
         serialNumber: {
             type: String, //Tipo texto

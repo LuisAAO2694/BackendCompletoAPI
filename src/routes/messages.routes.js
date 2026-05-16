@@ -2,6 +2,13 @@ import { Router } from 'express';
 import messagesController from '../controllers/messages.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import roleMiddleware from '../middlewares/role.middleware.js';
+import {
+    createMessageValidation,
+    respondMessageValidation,
+    messageIdValidation,
+    getMessagesValidation,
+    validate
+} from '../validators/messages.validator.js';
 
 const router = Router();
 
@@ -28,7 +35,7 @@ const router = Router();
  *       200:
  *         description: Lista de mensajes
  */
-router.get('/', authMiddleware, roleMiddleware('admin'), messagesController.getAll);
+router.get('/', authMiddleware, roleMiddleware('encargado'), getMessagesValidation, validate, messagesController.getAll);
 
 /**
  * @swagger
@@ -80,7 +87,7 @@ router.get('/mios', authMiddleware, messagesController.getMine);
  *       201:
  *         description: Mensaje enviado
  */
-router.post('/', authMiddleware, messagesController.create);
+router.post('/', authMiddleware, createMessageValidation, validate, messagesController.create);
 
 /**
  * @swagger
@@ -110,7 +117,7 @@ router.post('/', authMiddleware, messagesController.create);
  *       200:
  *         description: Mensaje respondido
  */
-router.patch('/:id/responder', authMiddleware, roleMiddleware('admin'), messagesController.respond);
+router.patch('/:id/responder', authMiddleware, roleMiddleware('encargado'), respondMessageValidation, validate, messagesController.respond);
 
 /**
  * @swagger
@@ -130,6 +137,6 @@ router.patch('/:id/responder', authMiddleware, roleMiddleware('admin'), messages
  *       200:
  *         description: Mensaje marcado como leído
  */
-router.patch('/:id/leido', authMiddleware, roleMiddleware('admin'), messagesController.markAsRead);
+router.patch('/:id/leido', authMiddleware, roleMiddleware('encargado'), messageIdValidation, validate, messagesController.markAsRead);
 
 export default router;

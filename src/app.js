@@ -24,8 +24,10 @@ connectDB();
 app.use(cors()); //Permite peticiones de otros origenes
 app.use(express.json()); //Permite leer JSON en el body
 
-//Configuramos Swagger para documentar la API
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+//Configuramos Swagger solo en desarrollo
+if (process.env.NODE_ENV !== 'production') {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+}
 
 //Registramos las rutas de la API
 app.use('/api/auth', authRoutes);

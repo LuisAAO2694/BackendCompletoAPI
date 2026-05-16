@@ -250,6 +250,43 @@ const processDevolutions = async (id, returns) => {
     return await loan.save();
 };
 
+//Funcion para buscar prestamos con equipos no devueltos
+/*
+    Rece pagina y limite
+    Filtra prestamos que tienen equipos con status PRESTADO o NO_DEVUELTO
+    Incluye los datos del estudiante y equipos
+    Retorna los prestamos y el total
+*/
+const findLoansNotReturned = async (page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    //Filtramos prestamos que tienen equipos no devueltos
+    const filters = {
+        $or: [
+            { status: 'ACTIVO' },
+            { status: 'PARCIALMENTE_DEVUELTO' }
+        ]
+    };
+
+    const [loans, total] = await Promise.all([
+        Loan.find(filters)
+            .populate('student', 'name email studentId')
+            .populate('managedBy', 'name email')
+            .populate('equipment.product', 'name serialNumber')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit),
+        Loan.countDocuments(filters)
+    ]);
+
+    //Filtramos solo los que tienen equipos no devueltos
+    const filteredLoans = loans.filter(loan => 
+        loan.equipment.some(eq => eq.status === 'PRESTADO' || eq.status === 'NO_DEVUELTO')
+    );
+
+    return { loans: filteredLoans, total: filteredLoans.length };
+};
+
 export default {
     createLoan,
     findAllLoans,
@@ -260,5 +297,6 @@ export default {
     rejectLoan,
     deliverLoan,
     cancelLoan,
-    processDevolutions
+    processDevolutions,
+    findLoansNotReturned
 };

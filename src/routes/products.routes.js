@@ -2,6 +2,13 @@ import { Router } from 'express';
 import productsController from '../controllers/products.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import roleMiddleware from '../middlewares/role.middleware.js';
+import { 
+    createProductValidation, 
+    updateProductValidation, 
+    getProductsValidation, 
+    productIdValidation, 
+    validate 
+} from '../validators/products.validator.js';
 
 const router = Router();
 
@@ -24,6 +31,16 @@ const router = Router();
  *           enum: [disponible, prestado, mantenimiento]
  *         description: Filtrar por estado
  *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Búsqueda por nombre
+ *       - in: query
+ *         name: laboratory
+ *         schema:
+ *           type: string
+ *         description: Filtrar por laboratorio
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
@@ -39,7 +56,31 @@ const router = Router();
  *       200:
  *         description: Lista de equipos
  */
-router.get('/', productsController.getAll);
+router.get('/', getProductsValidation, validate, productsController.getAll);
+
+/**
+ * @swagger
+ * /api/products/categories:
+ *   get:
+ *     summary: Obtener todas las categorías únicas
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Lista de categorías
+ */
+router.get('/categories', productsController.getCategories);
+
+/**
+ * @swagger
+ * /api/products/laboratories:
+ *   get:
+ *     summary: Obtener todos los laboratorios únicos
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Lista de laboratorios
+ */
+router.get('/laboratories', productsController.getLaboratories);
 
 /**
  * @swagger
@@ -59,7 +100,7 @@ router.get('/', productsController.getAll);
  *       404:
  *         description: Equipo no encontrado
  */
-router.get('/:id', productsController.getById);
+router.get('/:id', productIdValidation, validate, productsController.getById);
 
 /**
  * @swagger
@@ -78,10 +119,12 @@ router.get('/:id', productsController.getById);
  *             required:
  *               - name
  *               - category
+ *               - laboratory
  *             properties:
  *               name: { type: string }
  *               description: { type: string }
  *               category: { type: string }
+ *               laboratory: { type: string }
  *               serialNumber: { type: string }
  *               status: { type: string }
  *               image: { type: string }
@@ -93,7 +136,7 @@ router.get('/:id', productsController.getById);
  *       403:
  *         description: Acceso denegado
  */
-router.post('/', authMiddleware, roleMiddleware('admin'), productsController.create);
+router.post('/', authMiddleware, roleMiddleware('encargado'), createProductValidation, validate, productsController.create);
 
 /**
  * @swagger
@@ -119,6 +162,7 @@ router.post('/', authMiddleware, roleMiddleware('admin'), productsController.cre
  *               name: { type: string }
  *               description: { type: string }
  *               category: { type: string }
+ *               laboratory: { type: string }
  *               serialNumber: { type: string }
  *               status: { type: string }
  *               image: { type: string }
@@ -128,7 +172,7 @@ router.post('/', authMiddleware, roleMiddleware('admin'), productsController.cre
  *       404:
  *         description: Equipo no encontrado
  */
-router.put('/:id', authMiddleware, roleMiddleware('admin'), productsController.update);
+router.put('/:id', authMiddleware, roleMiddleware('encargado'), updateProductValidation, validate, productsController.update);
 
 /**
  * @swagger
@@ -150,6 +194,6 @@ router.put('/:id', authMiddleware, roleMiddleware('admin'), productsController.u
  *       404:
  *         description: Equipo no encontrado
  */
-router.delete('/:id', authMiddleware, roleMiddleware('admin'), productsController.remove);
+router.delete('/:id', authMiddleware, roleMiddleware('encargado'), productIdValidation, validate, productsController.remove);
 
 export default router;

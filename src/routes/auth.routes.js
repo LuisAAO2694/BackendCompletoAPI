@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import authController from '../controllers/auth.controller.js';
+import { registerValidation, loginValidation, validate } from '../validators/auth.validator.js';
 
-//Rutas
 const router = Router();
 
 /**
@@ -24,13 +24,17 @@ const router = Router();
  *               name: { type: string }
  *               email: { type: string }
  *               password: { type: string }
+ *               role: { type: string, enum: [estudiante, encargado] }
+ *               studentId: { type: string }
+ *               career: { type: string }
+ *               phone: { type: string }
  *     responses:
  *       201:
  *         description: Usuario registrado
  *       400:
- *         description: Email ya registrado
+ *         description: Error de validación o email ya registrado
  */
-router.post('/register', authController.register);
+router.post('/register', registerValidation, validate, authController.register);
 
 /**
  * @swagger
@@ -56,6 +60,6 @@ router.post('/register', authController.register);
  *       401:
  *         description: Credenciales inválidas
  */
-router.post('/login', authController.login);
+router.post('/login', loginValidation, validate, authController.login);
 
 export default router;

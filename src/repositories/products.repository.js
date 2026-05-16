@@ -55,10 +55,30 @@ const deleteProduct = async (id) => {
     return await Product.findByIdAndDelete(id);
 };
 
+//Funcion para obtener todas las categorías únicas
+/*
+    Retorna un array con las categorías únicas
+*/
+const findCategories = async () => {
+    const categories = await Product.distinct('category');
+    return categories;
+};
+
+//Funcion para obtener todos los laboratorios únicos
+/*
+    Retorna un array con los laboratorios únicos
+*/
+const findLaboratories = async () => {
+    const laboratories = await Product.distinct('laboratory');
+    return laboratories;
+};
+
 export default {
     createProduct,
     findAllProducts,
     findProductById,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    findCategories,
+    findLaboratories
 };

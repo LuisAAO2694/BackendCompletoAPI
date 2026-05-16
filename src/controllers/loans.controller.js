@@ -167,13 +167,13 @@ const cancel = async (req, res, next) => {
 };
 
 //Controlador para registrar devoluciones de un prestamo (admin)
-/*
-    Recibe el ID del prestamo por parametro de ruta
-    Recibe la lista de devoluciones en el body
+    /*
+    Rece el ID del prestamo por parametro de ruta
+    Rece la lista de devoluciones en el body
     Llama al servicio de prestamos para procesarlas
     Si hay un error, lo pasa al middleware de errores
     Retorna el prestamo actualizado
-*/
+    */
 const devolutions = async (req, res, next) => {
     try 
     {
@@ -187,4 +187,24 @@ const devolutions = async (req, res, next) => {
     }
 };
 
-export default { create, getAll, getMyLoans, getById, approve, reject, deliver, cancel, devolutions };
+//Controlador para obtener prestamos con equipos no devueltos (admin)
+    /*
+    Rece paginacion por query params
+    Filtra prestamos que tienen equipos con status PRESTADO o NO_DEVUELTO
+    Si hay un error, lo pasa al middleware de errores
+    Retorna los prestamos con equipos no devueltos
+    */
+const getNotReturned = async (req, res, next) => {
+    try 
+    {
+        const { page = 1, limit = 10 } = req.query;
+        const result = await loansService.getNotReturned(page, limit);
+        res.json(result);
+    } 
+    catch (error)
+    {
+        next(error);
+    }
+};
+
+export default { create, getAll, getMyLoans, getById, approve, reject, deliver, cancel, devolutions, getNotReturned };

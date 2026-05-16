@@ -25,15 +25,33 @@ const userSchema = new mongoose.Schema(
             required: true
         },
 
+        //Matricula del estudiante
+        studentId: {
+            type: String,
+            trim: true
+        },
+
+        //Carrera del estudiante
+        career: {
+            type: String,
+            trim: true
+        },
+
+        //Telefono del usuario
+        phone: {
+            type: String,
+            trim: true
+        },
+
         //Rol del usuario
         role: {
             type: String,
 
             //Solo permite estos valores
-            enum: ['admin', 'user'],
+            enum: ['encargado', 'estudiante'],
 
-            //Por defecto sera usuario normal
-            default: 'user'
+            //Por defecto sera estudiante
+            default: 'estudiante'
         }
     },
     {

@@ -92,11 +92,33 @@ const markAsRead = async (id) => {
     return await Message.findByIdAndUpdate(id, { read: true }, { new: true });
 };
 
+const findFromManager = async (userId, page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const [messages, total] = await Promise.all([
+        Message.find({ user: userId, sentByManager: true })
+            .populate('manager', 'name')
+            .populate('product', 'name')
+            .sort({ sentDate: -1 })
+            .skip(skip)
+            .limit(limit),
+        Message.countDocuments({ user: userId, sentByManager: true })
+    ]);
+
+    return { messages, total };
+};
+
+const deleteMessage = async (id) => {
+    return await Message.findByIdAndDelete(id);
+};
+
 export default {
     createMessage,
     findAllMessages,
     findMessagesByUser,
     findMessageById,
     updateMessageResponse,
-    markAsRead
+    markAsRead,
+    findFromManager,
+    deleteMessage
 };

@@ -102,4 +102,30 @@ const markAsRead = async (id) => {
     return message;
 };
 
-export default { create, getAll, getByUser, getById, respond, markAsRead };
+const getFromManager = async (userId, page, limit) => {
+    const result = await messagesRepository.findFromManager(userId, page, limit);
+    return {
+        total: result.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        data: result.messages
+    };
+};
+
+const deleteMessage = async (id, userId) => {
+    const message = await messagesRepository.findMessageById(id);
+    if (!message) {
+        const error = new Error('Mensaje no encontrado');
+        error.status = 404;
+        throw error;
+    }
+    const messageUserId = message.user._id ? String(message.user._id) : String(message.user);
+    if (messageUserId !== String(userId)) {
+        const error = new Error('No autorizado');
+        error.status = 403;
+        throw error;
+    }
+    await messagesRepository.deleteMessage(id);
+};
+
+export default { create, getAll, getByUser, getById, respond, markAsRead, getFromManager, deleteMessage };

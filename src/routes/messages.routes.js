@@ -7,6 +7,7 @@ import {
     respondMessageValidation,
     messageIdValidation,
     getMessagesValidation,
+    sendToStudentValidation,
     validate
 } from '../validators/messages.validator.js';
 
@@ -61,6 +62,10 @@ router.get('/', authMiddleware, roleMiddleware('encargado'), getMessagesValidati
  *         description: Lista de mis mensajes
  */
 router.get('/mios', authMiddleware, messagesController.getMine);
+
+router.get('/from-manager', authMiddleware, messagesController.getFromManager);
+
+router.delete('/:id', authMiddleware, messagesController.deleteMessage);
 
 /**
  * @swagger
@@ -138,5 +143,34 @@ router.patch('/:id/responder', authMiddleware, roleMiddleware('encargado'), resp
  *         description: Mensaje marcado como leído
  */
 router.patch('/:id/leido', authMiddleware, roleMiddleware('encargado'), messageIdValidation, validate, messagesController.markAsRead);
+
+/**
+ * @swagger
+ * /api/messages/to-student:
+ *   post:
+ *     summary: Enviar mensaje a estudiante (encargado)
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - student
+ *               - subject
+ *               - content
+ *             properties:
+ *               student: { type: string }
+ *               product: { type: string }
+ *               subject: { type: string }
+ *               content: { type: string }
+ *     responses:
+ *       201:
+ *         description: Mensaje enviado al estudiante
+ */
+router.post('/to-student', authMiddleware, roleMiddleware('encargado'), sendToStudentValidation, validate, messagesController.sendToStudent);
 
 export default router;

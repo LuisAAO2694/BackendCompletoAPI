@@ -50,6 +50,18 @@ const messageSchema = new mongoose.Schema(
             date: {
                 type: Date //Tipo fecha
             }
+        },
+
+        //ID del encargado que enviou el mensaje (para mensajes del encargado al estudiante)
+        manager: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+
+        //Indica si el mensaje fue enviado por el encargado al estudiante
+        sentByManager: {
+            type: Boolean,
+            default: false
         }
     },
     {

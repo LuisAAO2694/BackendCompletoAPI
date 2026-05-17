@@ -100,4 +100,54 @@ const markAsRead = async (req, res, next) => {
     }
 };
 
-export default { create, getAll, getMine, respond, markAsRead };
+const sendToStudent = async (req, res, next) => {
+    try 
+    {
+        const { student, subject, content, product } = req.body;
+        const message = await messagesService.create({
+            user: student,
+            subject,
+            content,
+            product,
+            manager: req.user.id,
+            sentByManager: true,
+            read: true,
+            response: {
+                content: 'Recordatorio enviado automáticamente por el encargado.',
+                date: new Date()
+            }
+        });
+        res.status(201).json(message);
+    } 
+    catch (error) 
+    {
+        next(error);
+    }
+};
+
+const getFromManager = async (req, res, next) => {
+    try 
+    {
+        const { page = 1, limit = 10 } = req.query;
+        const result = await messagesService.getFromManager(req.user.id, page, limit);
+        res.json(result);
+    } 
+    catch (error) 
+    {
+        next(error);
+    }
+};
+
+const deleteMessage = async (req, res, next) => {
+    try 
+    {
+        await messagesService.deleteMessage(req.params.id, req.user.id);
+        res.json({ message: 'Mensaje eliminado' });
+    } 
+    catch (error) 
+    {
+        next(error);
+    }
+};
+
+export default { create, getAll, getMine, getFromManager, respond, markAsRead, sendToStudent, deleteMessage };
